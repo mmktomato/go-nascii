@@ -12,3 +12,5 @@ $ nascii あいうえお
 $ nascii -r '\u3042\u3044\u3046\u3048\u304A'
 あいうえお
 ```
+
+Note: make sure your terminal encoding is UTF-8.
