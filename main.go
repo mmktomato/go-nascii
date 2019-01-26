@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/jessevdk/go-flags"
@@ -38,9 +39,12 @@ func utf8ToAscii(s string) {
 	}
 
 	for _, r := range s {
-		// TODO: ignore ascii characters.
-		codepoint := fmt.Sprintf("%U", r)[2:]
-		fmt.Printf("\\u%s", codepoint)
+		if r <= unicode.MaxASCII && !unicode.IsControl(r) {
+			fmt.Print(string(r))
+		} else {
+			codepoint := fmt.Sprintf("%U", r)[2:]
+			fmt.Printf("\\u%s", codepoint)
+		}
 	}
 	fmt.Println()
 }
