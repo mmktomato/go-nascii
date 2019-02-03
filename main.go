@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -14,6 +15,8 @@ import (
 type option struct {
 	IsReverse []bool `short:"r" long:"reverse" description:"Unicode code points to string. E.g. \\u3042\\u3044\\u3046\\u3048\\u304A -> あいうえお"`
 }
+
+var re = regexp.MustCompile(`\\[uU][0-9a-fA-F]{4}`)
 
 func main() {
 	var opt option
@@ -34,7 +37,7 @@ func main() {
 
 func utf8ToAscii(s string) {
 	if !utf8.ValidString(s) {
-		fmt.Println("'%s' includes non-UTF8 value(s).", s)
+		fmt.Printf("'%s' includes non-UTF8 value(s).\n", s)
 		return
 	}
 
@@ -50,21 +53,22 @@ func utf8ToAscii(s string) {
 }
 
 func asciiToUtf8(s string) {
-	// TODO: allow \\U
-	// TODO: allow non-codepoint value.
-	codepoints := strings.Split(s, "\\u")[1:]
-	rs := make([]rune, len(codepoints))
-	for i, codepoint := range codepoints {
-		n, err := strconv.ParseInt(codepoint, 16, 32)
-		if err != nil {
-			fmt.Println("'%s' includes non-encoded value(s).", s)
-			return
-		}
-		rs[i] = int32(n)
+	// TODO: handle surrogate pairs. (A surrogate pair consists of 0xD800-0xDBFF and 0xDC00-0xDFFF.)
+
+	match := re.FindString(s)
+	if match == "" {
+		fmt.Println(s)
+		return
 	}
 
-	for _, r := range rs {
-		fmt.Printf("%c", r)
+	codepoint := match[2:]
+	n, err := strconv.ParseInt(codepoint, 16, 32)
+	if err != nil {
+		fmt.Printf("'%s' can't be converted to number.\n", codepoint)
 	}
-	fmt.Println()
+
+	r := int32(n)
+	s = strings.Replace(s, match, string(r), -1)
+
+	asciiToUtf8(s)
 }
