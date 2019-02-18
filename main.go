@@ -53,7 +53,7 @@ func utf8ToAscii(s string) {
 }
 
 func asciiToUtf8(s string) {
-	// TODO: handle surrogate pairs. (A surrogate pair consists of 0xD800-0xDBFF and 0xDC00-0xDFFF.)
+	// TODO: handle surrogate pairs.
 
 	match := re.FindString(s)
 	if match == "" {
@@ -65,6 +65,7 @@ func asciiToUtf8(s string) {
 	n, err := strconv.ParseInt(codepoint, 16, 32)
 	if err != nil {
 		fmt.Printf("'%s' can't be converted to number.\n", codepoint)
+		return
 	}
 
 	r := int32(n)
